@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GraftCount — Surgical Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f12;
+  --bg2: #13161b;
+  --bg3: #1a1e25;
+  --bg4: #21262f;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0f2f5;
+  --text2: #8a9ab0;
+  --text3: #4a5568;
+  --accent: #00d4a1;
+  --accent2: #00b589;
+  --accent-dim: rgba(0,212,161,0.12);
+  --accent-dim2: rgba(0,212,161,0.06);
+  --red: #ff5c5c;
+  --red-dim: rgba(255,92,92,0.12);
+  --amber: #ffb830;
+  --amber-dim: rgba(255,184,48,0.12);
+  --purple: #a78bfa;
+  --purple-dim: rgba(167,139,250,0.12);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.12);
+  --coral: #fb923c;
+  --coral-dim: rgba(251,146,60,0.12);
+  --font: 'Sora', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --r: 10px;
+  --r-sm: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-mark {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-mark svg { width: 18px; height: 18px; fill: #0d0f12; }
+.logo-name { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+.logo-name span { color: var(--accent); }
+
+.patient-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.patient-bar input {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  height: 34px;
+  padding: 0 12px;
+  width: 200px;
+  outline: none;
+  transition: border-color .2s;
+}
+.patient-bar input:focus { border-color: var(--accent); }
+.patient-bar input::placeholder { color: var(--text3); }
+
+/* ── PATIENT INFO BAR ── */
+.patient-info-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.pib-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 140px;
+}
+.pib-field label {
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.pib-field input {
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  height: 32px;
+  padding: 0 10px;
+  outline: none;
+  transition: border-color .2s;
+  width: 100%;
+}
+.pib-field input:focus { border-color: var(--accent); }
+.pib-field input::placeholder { color: var(--text3); }
+
+/* ── NAV TABS ── */
+.nav-tabs {
+  display: flex;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+.nav-tab {
+  flex: 1;
+  padding: 14px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--text3);
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.nav-tab svg { width: 16px; height: 16px; opacity: .6; }
+.nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.nav-tab.active svg { opacity: 1; }
+
+/* ── SUMMARY STRIP ── */
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+.sum-cell {
+  padding: 14px 10px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.sum-cell:last-child { border-right: none; }
+.sum-val { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--text); line-height: 1; }
+.sum-val.accent { color: var(--accent); }
+.sum-lbl { font-size: 10px; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+
+/* ── DONOR ZONE TABS ── */
+.zone-nav {
+  display: flex;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.zone-nav::-webkit-scrollbar { display: none; }
+.ztab {
+  flex: 1;
+  min-width: 90px;
+  padding: 10px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--text3);
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.ztab.active { color: var(--text); }
+
+/* ── OPERATOR BAR ── */
+.op-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.op-lbl { font-size: 11px; color: var(--text3); }
+.op-chip {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  font-size: 12px;
+  font-family: var(--font);
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text2);
+  transition: all .15s;
+}
+.op-chip.active { border-width: 1.5px; }
+
+/* ── ZONE META ── */
+.zone-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+}
+.meta-field label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 5px; }
+.meta-field input {
+  width: 100%;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  height: 36px;
+  padding: 0 10px;
+  text-align: center;
+  outline: none;
+  transition: border-color .2s;
+}
+.meta-field input:focus { border-color: var(--accent); }
+.meta-computed {
+  background: var(--accent-dim);
+  border: 1px solid rgba(0,212,161,.2);
+  border-radius: var(--r-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+.meta-computed .mc-val { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--accent); line-height: 1; }
+.meta-computed .mc-lbl { font-size: 10px; color: var(--accent); opacity: .7; margin-top: 3px; }
+
+/* ── COUNT GRID ── */
+.count-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 10px;
+  padding: 14px 16px;
+}
+.graft-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 14px 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all .12s;
+  min-height: 100px;
+  position: relative;
+  overflow: hidden;
+}
+.graft-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity .12s;
+}
+.graft-btn:active::after { opacity: .08; transform: scale(.9); }
+.graft-btn:active { transform: scale(.95); }
+.graft-count {
+  font-family: var(--mono);
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+.graft-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; }
+.graft-dots { display: flex; gap: 3px; margin-top: 2px; }
+.gdot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+}
+
+/* ── UNDO ROW ── */
+.undo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.undo-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.undo-btn:hover { border-color: var(--accent); color: var(--accent); }
+.undo-btn svg { width: 14px; height: 14px; }
+.last-action { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+/* ── PROGRESS BARS ── */
+.prog-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.section-head { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
+.prog-row { margin-bottom: 12px; }
+.prog-row:last-child { margin-bottom: 0; }
+.prog-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.prog-name { font-size: 12px; font-weight: 500; }
+.prog-nums { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+.prog-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg4);
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width .4s cubic-bezier(.4,0,.2,1);
+}
+.prog-meta { display: flex; justify-content: space-between; margin-top: 3px; }
+.prog-pct { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+.prog-diff { font-size: 10px; font-family: var(--mono); font-weight: 500; }
+
+/* ── TABLES ── */
+.table-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th {
+  text-align: right;
+  color: var(--text3);
+  font-weight: 400;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 4px 8px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.data-table th:first-child { text-align: left; }
+.data-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-align: right;
+  vertical-align: middle;
+}
+.data-table td:first-child { text-align: left; }
+.data-table tr.total td {
+  border-bottom: none;
+  background: var(--bg3);
+  font-weight: 600;
+  font-family: var(--mono);
+}
+.data-table tr:last-child td { border-bottom: none; }
+
+/* ── PILLS & BADGES ── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+.hpg { background: var(--blue-dim); color: var(--blue); font-family: var(--mono); font-size: 11px; padding: 2px 7px; border-radius: var(--r-sm); font-weight: 500; }
+.pos { color: var(--accent); font-weight: 600; font-family: var(--mono); }
+.neg { color: var(--red); font-weight: 600; font-family: var(--mono); }
+
+/* ── RECIPIENT TAB ── */
+.rec-summary-card {
+  margin: 14px 16px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 14px;
+}
+.rec-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+.rec-stat { text-align: center; }
+.rec-stat-val { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--text); line-height: 1; }
+.rec-stat-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-top: 4px; }
+.match-label-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+.match-track { height: 10px; border-radius: 5px; background: var(--bg4); overflow: hidden; }
+.match-fill { height: 100%; border-radius: 5px; transition: width .4s cubic-bezier(.4,0,.2,1); }
+.match-foot { display: flex; justify-content: space-between; margin-top: 5px; }
+.match-status { font-size: 11px; color: var(--text3); }
+.match-diff-val { font-size: 11px; font-weight: 600; font-family: var(--mono); }
+
+.rec-group-head {
+  padding: 8px 16px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rec-group-head span {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+
+.rec-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px 16px;
+}
+.rec-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.rec-card-head {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.rec-card-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.rec-field label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 4px; }
+.rec-field input {
+  width: 100%;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  height: 34px;
+  padding: 0 8px;
+  text-align: center;
+  outline: none;
+  transition: border-color .2s;
+}
+.rec-field input:focus { border-color: var(--accent); }
+.rec-result {
+  background: var(--bg2);
+  border-radius: var(--r-sm);
+  padding: 8px;
+  text-align: center;
+}
+.rec-result-val { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--accent); line-height: 1; }
+.rec-result-lbl { font-size: 10px; color: var(--text3); margin-top: 3px; }
+
+.vertex-card {
+  margin: 0 16px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.vertex-card-head {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.vertex-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 12px 14px;
+  align-items: end;
+}
+
+/* ── FOOTER ACTIONS ── */
+.footer-actions {
+  display: flex;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--bg2);
+}
+.btn-primary {
+  flex: 1;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--r-sm);
+  color: #0a0f12;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: all .15s;
+}
+.btn-primary:hover { background: var(--accent2); }
+.btn-primary svg { width: 15px; height: 15px; }
+.btn-danger {
+  background: transparent;
+  border: 1px solid rgba(255,92,92,.3);
+  border-radius: var(--r-sm);
+  color: var(--red);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  height: 40px;
+  padding: 0 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .15s;
+}
+.btn-danger:hover { background: var(--red-dim); }
+.btn-danger svg { width: 14px; height: 14px; }
+
+/* ── MODAL / REPORT ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.75);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.modal-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title { font-size: 15px; font-weight: 600; }
+.modal-close {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 20px; line-height: 1; padding: 2px 6px;
+}
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 20px; }
+.report-section { margin-bottom: 20px; }
+.report-section-title { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; border-bottom: 1px solid var(--accent-dim); padding-bottom: 6px; }
+.report-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.report-row:last-child { border-bottom: none; }
+.report-key { color: var(--text2); }
+.report-val { font-family: var(--mono); font-weight: 500; }
+.btn-copy {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  height: 40px;
+  cursor: pointer;
+  transition: all .15s;
+  margin-top: 4px;
+}
+.btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+
+.footer-wrap {
+  background: var(--bg2);
+  border-top: 1px solid var(--border2);
+}
+.footer-op-bar {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+}
+.footer-backup-bar {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+}
+.backup-bar {
+  border: none;
+}
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+
+/* ── COUNTING AREA: split layout ── */
+.counting-area {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  min-height: 340px;
+}
+
+/* LEFT panel */
+.counting-left {
+  flex: 1;
+  padding: 14px 14px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.live-stats { display: flex; flex-direction: column; gap: 0; }
+.ls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.ls-row:last-child { border-bottom: none; }
+.ls-lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; }
+.ls-val { font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--text); }
+.ls-val.accent { color: var(--accent); font-size: 20px; }
+.ls-divider { height: 1px; background: var(--border2); margin: 4px 0; }
+
+/* RIGHT panel — vertical graft buttons */
+.counting-right {
+  display: flex;
+  flex-direction: column;
+  width: 130px;
+  flex-shrink: 0;
+  gap: 0;
+}
+
+.graft-btn-v {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  gap: 8px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+  cursor: pointer;
+  transition: all .1s;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+.graft-btn-v:last-child { border-bottom: none; }
+.graft-btn-v:active { background: var(--bg4); transform: scale(0.97); }
+.graft-btn-v::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity .1s;
+}
+.graft-btn-v:active::after { opacity: .07; }
+
+.gbv-dots { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; width: 10px; }
+.gbv-count {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+  flex: 1;
+  text-align: center;
+}
+.gbv-label {
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  text-align: right;
+  flex-shrink: 0;
+  width: 38px;
+}
+
+/* ── BACKUP / RESTORE ── */
+.backup-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.backup-lbl { font-size: 11px; color: var(--text3); margin-right: 4px; }
+.btn-backup {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-backup:hover { border-color: var(--accent); color: var(--accent); }
+.btn-backup svg { width: 13px; height: 13px; }
+.btn-restore {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(167,139,250,.3);
+  background: transparent;
+  color: var(--purple);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-restore:hover { background: var(--purple-dim); }
+.btn-restore svg { width: 13px; height: 13px; }
+.backup-status { font-size: 11px; color: var(--text3); font-family: var(--mono); margin-left: auto; }
+
+@media (max-width: 480px) {
+  .patient-bar input { width: 140px; }
+  .logo-name { font-size: 13px; }
+  .speed-num { font-size: 15px; }
+  .counting-right { width: 110px; }
+  .gbv-count { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="3"/><circle cx="10" cy="3" r="1.5"/><circle cx="10" cy="17" r="1.5"/><circle cx="3" cy="10" r="1.5"/><circle cx="17" cy="10" r="1.5"/><circle cx="5.05" cy="5.05" r="1.5"/><circle cx="14.95" cy="14.95" r="1.5"/><circle cx="14.95" cy="5.05" r="1.5"/><circle cx="5.05" cy="14.95" r="1.5"/></svg>
+    </div>
+    <span class="logo-name">Graft<span>Count</span></span>
+  </div>
+  <div style="font-size:11px;color:var(--text3)">Surgical graft counter</div>
+</div>
+
+<!-- PATIENT INFO BAR -->
+<div class="patient-info-bar">
+  <div class="pib-field">
+    <label>Patient name</label>
+    <input id="pt-input" type="text" placeholder="Full name">
+  </div>
+  <div class="pib-field">
+    <label>Date of surgery</label>
+    <input id="pt-date" type="date">
+  </div>
+  <div class="pib-field">
+    <label>Mobile number</label>
+    <input id="pt-mobile" type="tel" placeholder="+91 00000 00000">
+  </div>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="switchTab('donor',this)" id="tab-donor">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v7a6 6 0 006 6 6 6 0 006-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+    Donor extraction
+  </button>
+  <button class="nav-tab" onclick="switchTab('recipient',this)" id="tab-recipient">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+    Recipient planning
+  </button>
+</div>
+
+<!-- ═══════════════ DONOR TAB ═══════════════ -->
+<div id="donor-tab">
+
+  <div class="zone-nav" id="zone-nav">
+    <button class="ztab active" onclick="selectZone(0,this)">1. L Occipital</button>
+    <button class="ztab" onclick="selectZone(1,this)">2. R Occipital</button>
+    <button class="ztab" onclick="selectZone(2,this)">3. L Temporal</button>
+    <button class="ztab" onclick="selectZone(3,this)">4. R Temporal</button>
+  </div>
+
+  <div class="zone-meta">
+    <div class="meta-field">
+      <label>Area (cm²)</label>
+      <input type="number" min="0" step="0.1" id="area-input" placeholder="e.g. 35" oninput="updateZoneMeta()">
+    </div>
+    <div class="meta-field">
+      <label>Density (g/cm²)</label>
+      <input type="number" min="0" step="1" id="density-input" placeholder="e.g. 80" oninput="updateZoneMeta()">
+    </div>
+    <div class="meta-computed">
+      <div class="mc-val" id="zone-capacity">—</div>
+      <div class="mc-lbl">Est. grafts</div>
+    </div>
+  </div>
+
+  <div class="summary-strip">
+    <div class="sum-cell"><div class="sum-val accent" id="s-total">0</div><div class="sum-lbl">Total grafts</div></div>
+    <div class="sum-cell"><div class="sum-val" id="s-hairs">0</div><div class="sum-lbl">Total hairs</div></div>
+    <div class="sum-cell"><div class="sum-val" id="s-hpg">—</div><div class="sum-lbl">Avg H/G</div></div>
+    <div class="sum-cell"><div class="sum-val" id="s-singles">—%</div><div class="sum-lbl">Singles %</div></div>
+  </div>
+
+  <div class="counting-area">
+    <!-- LEFT: zone info + live counts -->
+    <div class="counting-left">
+      <div class="live-stats">
+        <div class="ls-row">
+          <span class="ls-lbl">This zone</span>
+          <span class="ls-val accent" id="zone-live-count">0</span>
+        </div>
+        <div class="ls-row">
+          <span class="ls-lbl">1-hair</span><span class="ls-val" id="lc-0">0</span>
+        </div>
+        <div class="ls-row">
+          <span class="ls-lbl">2-hair</span><span class="ls-val" id="lc-1">0</span>
+        </div>
+        <div class="ls-row">
+          <span class="ls-lbl">3-hair</span><span class="ls-val" id="lc-2">0</span>
+        </div>
+        <div class="ls-row">
+          <span class="ls-lbl">4-hair</span><span class="ls-val" id="lc-3">0</span>
+        </div>
+        <div class="ls-divider"></div>
+        <div class="ls-row">
+          <span class="ls-lbl">Total</span><span class="ls-val accent" id="lc-total">0</span>
+        </div>
+        <div class="ls-row">
+          <span class="ls-lbl">Hairs</span><span class="ls-val" id="lc-hairs">0</span>
+        </div>
+        <div class="ls-row">
+          <span class="ls-lbl">H/G</span><span class="ls-val" id="lc-hpg">—</span>
+        </div>
+      </div>
+      <button class="undo-btn" onclick="undoLast()" style="margin-top:10px;width:100%">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 00-4-4H4"/></svg>
+        Undo
+      </button>
+      <div class="last-action" id="last-action" style="margin-top:8px;font-size:10px;line-height:1.4">No entries yet</div>
+    </div>
+
+    <!-- RIGHT: graft buttons stacked vertically for one-hand use -->
+    <div class="counting-right">
+      <button class="graft-btn-v" onclick="addGraft(0)" id="gbtn-0">
+        <div class="gbv-dots"><div class="gdot"></div></div>
+        <div class="gbv-count" id="gc-0">0</div>
+        <div class="gbv-label">1 hair</div>
+      </button>
+      <button class="graft-btn-v" onclick="addGraft(1)" id="gbtn-1">
+        <div class="gbv-dots"><div class="gdot"></div><div class="gdot"></div></div>
+        <div class="gbv-count" id="gc-1">0</div>
+        <div class="gbv-label">2 hairs</div>
+      </button>
+      <button class="graft-btn-v" onclick="addGraft(2)" id="gbtn-2">
+        <div class="gbv-dots"><div class="gdot"></div><div class="gdot"></div><div class="gdot"></div></div>
+        <div class="gbv-count" id="gc-2">0</div>
+        <div class="gbv-label">3 hairs</div>
+      </button>
+      <button class="graft-btn-v" onclick="addGraft(3)" id="gbtn-3">
+        <div class="gbv-dots"><div class="gdot"></div><div class="gdot"></div><div class="gdot"></div><div class="gdot"></div></div>
+        <div class="gbv-count" id="gc-3">0</div>
+        <div class="gbv-label">4 hairs</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="prog-section">
+    <div class="section-head">Extracted vs estimated — donor zones</div>
+    <div id="donor-progress"></div>
+  </div>
+
+  <div class="table-section">
+    <div class="section-head">Zone breakdown</div>
+    <table class="data-table">
+      <thead><tr>
+        <th style="width:20%">Zone</th>
+        <th>Grafts</th><th>Hairs</th><th>H/G</th>
+        <th>Est. grafts</th><th>Extr. %</th><th>Extr. estimate</th><th>Extracted</th><th>Difference</th>
+      </tr></thead>
+      <tbody id="donor-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="table-section">
+    <div class="section-head">Assistant breakdown</div>
+    <table class="data-table">
+      <thead><tr>
+        <th style="width:30%">Operator</th>
+        <th>Grafts</th><th>Hairs</th><th>H/G</th><th>Speed g/hr</th>
+      </tr></thead>
+      <tbody id="op-tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ═══════════════ RECIPIENT TAB ═══════════════ -->
+<div id="recipient-tab" style="display:none">
+
+  <div class="rec-summary-card">
+    <div class="rec-stats">
+      <div class="rec-stat">
+        <div class="rec-stat-val" id="r-total-grafts">0</div>
+        <div class="rec-stat-lbl">Grafts needed</div>
+      </div>
+      <div class="rec-stat">
+        <div class="rec-stat-val" id="r-total-area">0</div>
+        <div class="rec-stat-lbl">Area (cm²)</div>
+      </div>
+      <div class="rec-stat">
+        <div class="rec-stat-val" id="r-avg-density">—</div>
+        <div class="rec-stat-lbl">Avg g/cm²</div>
+      </div>
+    </div>
+    <div class="match-label-row">
+      <span>Donor available vs recipient needed</span>
+      <span id="match-nums" style="font-family:var(--mono)">— / —</span>
+    </div>
+    <div class="match-track">
+      <div class="match-fill" id="match-fill" style="width:0%;background:var(--accent)"></div>
+    </div>
+    <div class="match-foot">
+      <span class="match-status" id="match-status">Enter data to see donor–recipient balance</span>
+      <span class="match-diff-val" id="match-diff"></span>
+    </div>
+  </div>
+
+  <div class="rec-group-head"><span style="background:#fb923c"></span>Frontal</div>
+  <div class="rec-cards-grid" id="rec-frontal"></div>
+
+  <div class="rec-group-head"><span style="background:#a78bfa"></span>Mid-scalp</div>
+  <div class="rec-cards-grid" id="rec-midscalp"></div>
+
+  <div class="rec-group-head"><span style="background:#4ade80"></span>Vertex</div>
+  <div style="padding:12px 16px" id="rec-vertex"></div>
+
+  <div class="table-section" style="margin-top:4px">
+    <div class="section-head">Recipient zone breakdown</div>
+    <table class="data-table">
+      <thead><tr>
+        <th style="width:32%">Zone</th>
+        <th>Area (cm²)</th><th>Density (g/cm²)</th>
+        <th>Grafts needed</th><th>% of total</th>
+      </tr></thead>
+      <tbody id="rec-tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer-wrap">
+  <!-- Operator row -->
+  <div class="op-bar footer-op-bar">
+    <span class="op-lbl">Operator:</span>
+    <button class="op-chip active" onclick="selectOp(0,this)">Assistant 1</button>
+    <button class="op-chip" onclick="selectOp(1,this)">Assistant 2</button>
+    <button class="op-chip" onclick="selectOp(2,this)">Assistant 3</button>
+    <button class="op-chip" onclick="selectOp(3,this)">Surgeon</button>
+  </div>
+  <!-- Backup / restore row -->
+  <div class="backup-bar footer-backup-bar">
+    <span class="backup-lbl">Session:</span>
+    <button class="btn-backup" onclick="saveBackup()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Save backup
+    </button>
+    <button class="btn-restore" onclick="triggerRestore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Restore
+    </button>
+    <input type="file" id="restore-input" accept=".json" style="display:none" onchange="loadBackup(event)">
+    <span class="backup-status" id="backup-status">No backup saved</span>
+  </div>
+  <!-- Action buttons -->
+  <div class="footer-actions">
+    <button class="btn-primary" onclick="openReport()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Surgical report
+    </button>
+    <button class="btn-danger" onclick="resetAll()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+      Reset
+    </button>
+  </div>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeReport()">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Surgical report</span>
+      <button class="modal-close" onclick="closeReport()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const DZONES = ['1. L Occipital','2. R Occipital','3. L Temporal','4. R Temporal'];
+const DCOLORS = ['#00d4a1','#a78bfa','#fb923c','#60a5fa'];
+
+const RZONES = [
+  {id:'lf',  label:'L Frontal',     group:'frontal',  color:'#fb923c'},
+  {id:'rf',  label:'R Frontal',     group:'frontal',  color:'#fb923c'},
+  {id:'lm1', label:'L Mid-scalp 1', group:'midscalp', color:'#a78bfa'},
+  {id:'rm1', label:'R Mid-scalp 1', group:'midscalp', color:'#a78bfa'},
+  {id:'lm2', label:'L Mid-scalp 2', group:'midscalp', color:'#7c3aed'},
+  {id:'rm2', label:'R Mid-scalp 2', group:'midscalp', color:'#7c3aed'},
+  {id:'vtx', label:'Vertex',        group:'vertex',   color:'#4ade80'},
+];
+
+const OPS = ['Assistant 1','Assistant 2','Assistant 3','Surgeon'];
+const OP_COLORS = ['#00d4a1','#a78bfa','#fb923c','#ffb830'];
+
+let cZ = 0, cOp = 0;
+let counts = Array.from({length:4}, () => Array.from({length:4}, () => [0,0,0,0]));
+let zArea = [0,0,0,0], zDens = [0,0,0,0], zExtPct = [0,0,0,0];
+let history = [], startTime = null, opStart = [null,null,null,null], speedTimer = null;
+let recData = {}; RZONES.forEach(z => recData[z.id] = {area:0, density:0});
+
+// ── HELPERS ──
+const zG = zi => counts[zi].reduce((a,op)=>a+op.reduce((b,c)=>b+c,0),0);
+const zH = zi => counts[zi].reduce((a,op)=>a+op.reduce((b,c,i)=>b+c*(i+1),0),0);
+const opG = oi => counts.reduce((a,z)=>a+z[oi].reduce((b,c)=>b+c,0),0);
+const opH = oi => counts.reduce((a,z)=>a+z[oi].reduce((b,c,i)=>b+c*(i+1),0),0);
+const totalG = () => [0,1,2,3].reduce((a,zi)=>a+zG(zi),0);
+const totalH = () => [0,1,2,3].reduce((a,zi)=>a+zH(zi),0);
+const estDonor = () => [0,1,2,3].reduce((a,zi)=>{const a2=zArea[zi],d=zDens[zi];return a+(a2&&d?Math.round(a2*d):0);},0);
+
+function setDotColors() {
+  const c = DCOLORS[cZ];
+  document.querySelectorAll('.gdot').forEach(d => d.style.background = c);
+  for (let i=0;i<4;i++) {
+    const btn = document.getElementById('gbtn-'+i);
+    if (btn) btn.style.borderColor = 'transparent';
+  }
+}
+
+// ── TAB SWITCH ──
+function switchTab(tab, el) {
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('donor-tab').style.display = tab==='donor'?'':'none';
+  document.getElementById('recipient-tab').style.display = tab==='recipient'?'':'none';
+  if (tab==='recipient') { buildRecGrid(); renderRecipient(); }
+}
+
+// ── PATIENT ──
+function updatePatient() {}
+
+// ── DONOR ACTIONS ──
+function addGraft(hairIdx) {
+  if (!startTime) { startTime = Date.now(); speedTimer = setInterval(updateSpeed, 4000); }
+  if (!opStart[cOp]) opStart[cOp] = Date.now();
+  counts[cZ][cOp][hairIdx]++;
+  history.push({z:cZ, op:cOp, h:hairIdx});
+  document.getElementById('last-action').textContent = 'Last: +'+(hairIdx+1)+' hair · '+DZONES[cZ]+' · '+OPS[cOp];
+  updateSpeed(); renderDonor();
+  // flash btn border
+  const btn = document.getElementById('gbtn-'+hairIdx);
+  btn.style.background = DCOLORS[cZ]+'22';
+  setTimeout(()=>btn.style.background='var(--bg3)',250);
+}
+
+function undoLast() {
+  if (!history.length) return;
+  const last = history.pop();
+  counts[last.z][last.op][last.h]--;
+  document.getElementById('last-action').textContent = history.length
+    ? 'Undone · last: +'+(history[history.length-1].h+1)+' hair' : 'No entries yet';
+  renderDonor();
+}
+
+function selectZone(idx, el) {
+  cZ = idx;
+  document.querySelectorAll('.ztab').forEach(t => {t.classList.remove('active'); t.style.borderBottomColor='transparent'; t.style.color='';});
+  el.classList.add('active');
+  el.style.borderBottomColor = DCOLORS[idx];
+  el.style.color = DCOLORS[idx];
+  document.getElementById('area-input').value = zArea[idx]||'';
+  document.getElementById('density-input').value = zDens[idx]||'';
+  updateZoneCapacity(); setDotColors();
+}
+
+function selectOp(idx, el) {
+  cOp = idx;
+  document.querySelectorAll('.op-chip').forEach(c => {c.classList.remove('active'); c.style.borderColor=''; c.style.color='';});
+  el.classList.add('active');
+  el.style.borderColor = OP_COLORS[idx];
+  el.style.color = OP_COLORS[idx];
+}
+
+function updateZoneMeta() {
+  zArea[cZ] = parseFloat(document.getElementById('area-input').value)||0;
+  zDens[cZ] = parseFloat(document.getElementById('density-input').value)||0;
+  updateZoneCapacity(); renderDonor();
+}
+function updateZoneCapacity() {
+  const a=zArea[cZ],d=zDens[cZ];
+  document.getElementById('zone-capacity').textContent = (a&&d) ? Math.round(a*d).toLocaleString() : '—';
+}
+
+function updateSpeed() { /* speed badge removed */ }
+
+// ── RENDER DONOR ──
+function renderDonor() {
+  // Right-side button counts (current zone total per hair type across all ops)
+  for (let i=0;i<4;i++) {
+    const total = counts[cZ].reduce((a,op)=>a+op[i],0);
+    document.getElementById('gc-'+i).textContent = total;
+  }
+  // Left-side live stats (current zone)
+  const zoneTotals = [0,1,2,3].map(i => counts[cZ].reduce((a,op)=>a+op[i],0));
+  const zoneG = zoneTotals.reduce((a,c)=>a+c,0);
+  const zoneH = zoneTotals.reduce((a,c,i)=>a+c*(i+1),0);
+  for (let i=0;i<4;i++) document.getElementById('lc-'+i).textContent = zoneTotals[i];
+  document.getElementById('lc-total').textContent = zoneG;
+  document.getElementById('lc-hairs').textContent = zoneH;
+  document.getElementById('lc-hpg').textContent = zoneG ? (zoneH/zoneG).toFixed(2) : '—';
+  document.getElementById('zone-live-count').textContent = zoneG;
+
+  // Global summary strip
+  const tg=totalG(), th=totalH();
+  document.getElementById('s-total').textContent = tg;
+  document.getElementById('s-hairs').textContent = th;
+  document.getElementById('s-hpg').textContent = tg ? (th/tg).toFixed(2) : '—';
+  const singles = counts.reduce((a,z)=>a+z.reduce((b,op)=>b+op[0],0),0);
+  document.getElementById('s-singles').textContent = tg ? Math.round(singles/tg*100)+'%' : '—%';
+  renderDonorProgress(); renderDonorTable(); renderOpTable();
+}
+
+function renderDonorProgress() {
+  const wrap = document.getElementById('donor-progress');
+  let html='', any=false;
+  for (let zi=0;zi<4;zi++) {
+    const ext=zG(zi), a=zArea[zi], d=zDens[zi];
+    const est=(a&&d)?Math.round(a*d):0;
+    const pct=zExtPct[zi]||0;
+    const extEst=(est&&pct)?Math.round(est*pct/100):0; // col 7 value
+    const denom=extEst||est; // prefer extEst when available, fallback to est
+    if (!denom&&!ext) continue; any=true;
+    const fillPct=denom>0?Math.min(Math.round(ext/denom*100),100):0;
+    const over=denom>0&&ext>denom;
+    const diff=denom>0?ext-denom:null;
+    const fillColor=over?'#ff5c5c':DCOLORS[zi];
+    const denomLabel=extEst?extEst.toLocaleString():(est?est.toLocaleString():'—');
+    const denomNote=extEst?`${pct}% of ${est.toLocaleString()}`:'';
+    html+=`<div class="prog-row">
+      <div class="prog-top">
+        <span class="prog-name"><span class="pill" style="background:${fillColor}22;color:${fillColor}">${DZONES[zi]}</span></span>
+        <span class="prog-nums"><span style="color:${fillColor};font-weight:600">${ext.toLocaleString()}</span> / ${denomLabel}${denomNote?` <span style="color:var(--text3);font-size:10px">(${denomNote})</span>`:''}</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" style="width:${fillPct}%;background:${fillColor}"></div></div>
+      <div class="prog-meta">
+        <span class="prog-pct">${denom?fillPct+'% of target':'Set area & density'}</span>
+        ${diff!==null?`<span class="prog-diff ${diff>=0?'pos':'neg'}">${diff>=0?'+':''}${diff}</span>`:''}
+      </div>
+    </div>`;
+  }
+  wrap.innerHTML = any ? html : '<div style="font-size:12px;color:var(--text3);padding:4px 0">Enter area and density per zone to see progress</div>';
+}
+
+function renderDonorTable() {
+  let rows='', tG2=0, tH2=0, tEst=0, tExtEst=0, tExt=0;
+  for (let zi=0;zi<4;zi++) {
+    const zg=zG(zi), zh=zH(zi), a=zArea[zi], d=zDens[zi];
+    const est=(a&&d)?Math.round(a*d):null;
+    const pct=zExtPct[zi]||0;
+    const extEst=(est&&pct)?Math.round(est*pct/100):null;
+    const diff=extEst!==null?zg-extEst:null;
+    tG2+=zg; tH2+=zh;
+    if(est!==null) tEst+=est;
+    if(extEst!==null) tExtEst+=extEst;
+    if(extEst!==null) tExt+=zg;
+    const c=DCOLORS[zi];
+    const diffClass=diff!==null?(diff>=0?'pos':'neg'):'';
+    rows+=`<tr>
+      <td><span class="pill" style="background:${c}20;color:${c}">${DZONES[zi]}</span></td>
+      <td>${zg||'—'}</td><td>${zh||'—'}</td>
+      <td>${zg?`<span class="hpg">${(zh/zg).toFixed(2)}</span>`:'—'}</td>
+      <td style="font-family:var(--mono)">${est!==null?est.toLocaleString():'—'}</td>
+      <td style="padding:4px 6px">
+        <input type="number" min="0" max="100" step="1"
+          value="${pct||''}"
+          placeholder="%" 
+          oninput="zExtPct[${zi}]=parseFloat(this.value)||0; renderDonorTable();"
+          style="width:52px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;height:26px;text-align:center;outline:none;padding:0 4px">
+      </td>
+      <td style="font-family:var(--mono);font-weight:600;color:var(--accent)">${extEst!==null?extEst.toLocaleString():'—'}</td>
+      <td style="font-family:var(--mono);font-weight:600">${extEst!==null?zg:'—'}</td>
+      <td>${diff!==null?`<span class="${diffClass}">${diff>=0?'+':''}${diff}</span>`:'—'}</td>
+    </tr>`;
+  }
+  const tHpg=tG2?(tH2/tG2).toFixed(2):'—';
+  const tDiff=tExtEst>0?tExt-tExtEst:null;
+  rows+=`<tr class="total">
+    <td>Total</td><td>${tG2||'—'}</td><td>${tH2||'—'}</td>
+    <td>${tG2?`<span class="hpg">${tHpg}</span>`:'—'}</td>
+    <td style="font-family:var(--mono)">${tEst||'—'}</td>
+    <td>—</td>
+    <td style="font-family:var(--mono);font-weight:600;color:var(--accent)">${tExtEst||'—'}</td>
+    <td style="font-family:var(--mono);font-weight:600">${tExt||'—'}</td>
+    <td>${tDiff!==null?`<span class="${tDiff>=0?'pos':'neg'}">${tDiff>=0?'+':''}${tDiff}</span>`:'—'}</td>
+  </tr>`;
+  document.getElementById('donor-tbody').innerHTML = rows;
+}
+
+function renderOpTable() {
+  let rows='';
+  for (let oi=0;oi<4;oi++) {
+    const og=opG(oi), oh=opH(oi); if(!og) continue;
+    const oHrs=opStart[oi]?(Date.now()-opStart[oi])/3600000:0;
+    const c=OP_COLORS[oi];
+    rows+=`<tr>
+      <td><span class="pill" style="background:${c}20;color:${c}">${OPS[oi]}</span></td>
+      <td>${og}</td><td>${oh}</td>
+      <td><span class="hpg">${(oh/og).toFixed(2)}</span></td>
+      <td style="font-family:var(--mono)">${oHrs>0.0005?Math.round(og/oHrs):'—'}</td>
+    </tr>`;
+  }
+  document.getElementById('op-tbody').innerHTML = rows||'<tr><td colspan="5" style="color:var(--text3);text-align:center;padding:12px">No extractions yet</td></tr>';
+}
+
+// ── RECIPIENT ──
+function recCardHTML(z) {
+  const d=recData[z.id];
+  const g=(d.area&&d.density)?Math.round(d.area*d.density):null;
+  return `<div class="rec-card">
+    <div class="rec-card-head">
+      <span class="pill" style="background:${z.color}20;color:${z.color}">${z.label}</span>
+    </div>
+    <div class="rec-card-body">
+      <div class="rec-field">
+        <label>Area (cm²)</label>
+        <input type="number" min="0" step="0.1" id="ra-${z.id}" placeholder="e.g. 20" value="${d.area||''}" oninput="updateRec('${z.id}')">
+      </div>
+      <div class="rec-field">
+        <label>Target density (g/cm²)</label>
+        <input type="number" min="0" step="1" id="rd-${z.id}" placeholder="e.g. 40" value="${d.density||''}" oninput="updateRec('${z.id}')">
+      </div>
+      <div class="rec-result">
+        <div class="rec-result-val" id="rr-${z.id}">${g?g.toLocaleString():'—'}</div>
+        <div class="rec-result-lbl">grafts needed</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildRecGrid() {
+  document.getElementById('rec-frontal').innerHTML = RZONES.filter(z=>z.group==='frontal').map(recCardHTML).join('');
+  document.getElementById('rec-midscalp').innerHTML = RZONES.filter(z=>z.group==='midscalp').map(recCardHTML).join('');
+  const vtx = RZONES.find(z=>z.id==='vtx');
+  const d = recData['vtx'];
+  const g=(d.area&&d.density)?Math.round(d.area*d.density):null;
+  document.getElementById('rec-vertex').innerHTML=`
+    <div class="vertex-card">
+      <div class="vertex-card-head">
+        <span class="pill" style="background:${vtx.color}20;color:${vtx.color}">${vtx.label}</span>
+        <span style="font-size:11px;color:var(--text3)">Crown — single zone</span>
+      </div>
+      <div class="vertex-body">
+        <div class="rec-field">
+          <label>Area (cm²)</label>
+          <input type="number" min="0" step="0.1" id="ra-vtx" placeholder="e.g. 60" value="${d.area||''}" oninput="updateRec('vtx')">
+        </div>
+        <div class="rec-field">
+          <label>Target density (g/cm²)</label>
+          <input type="number" min="0" step="1" id="rd-vtx" placeholder="e.g. 25" value="${d.density||''}" oninput="updateRec('vtx')">
+        </div>
+        <div class="rec-result">
+          <div class="rec-result-val" id="rr-vtx">${g?g.toLocaleString():'—'}</div>
+          <div class="rec-result-lbl">grafts needed</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function updateRec(id) {
+  recData[id].area = parseFloat(document.getElementById('ra-'+id).value)||0;
+  recData[id].density = parseFloat(document.getElementById('rd-'+id).value)||0;
+  const g=(recData[id].area&&recData[id].density)?Math.round(recData[id].area*recData[id].density):null;
+  document.getElementById('rr-'+id).textContent = g?g.toLocaleString():'—';
+  renderRecipient();
+}
+
+function renderRecipient() {
+  let tG2=0, tA=0;
+  RZONES.forEach(z=>{const d=recData[z.id]; if(d.area&&d.density)tG2+=Math.round(d.area*d.density); if(d.area)tA+=d.area;});
+  const avgD=tA>0&&tG2>0?(tG2/tA).toFixed(1):'—';
+  document.getElementById('r-total-grafts').textContent = tG2.toLocaleString();
+  document.getElementById('r-total-area').textContent = tA.toFixed(1);
+  document.getElementById('r-avg-density').textContent = avgD;
+
+  const donorAvail=totalG(), donorEst=estDonor();
+  const dVal=donorAvail>0?donorAvail:(donorEst>0?donorEst:0);
+  document.getElementById('match-nums').textContent=(dVal||'—')+' / '+(tG2||'—');
+  if (dVal&&tG2) {
+    const pct=Math.min(Math.round(dVal/tG2*100),100), over=dVal>=tG2, diff=dVal-tG2;
+    document.getElementById('match-fill').style.width=pct+'%';
+    document.getElementById('match-fill').style.background=over?'#00d4a1':'#ff5c5c';
+    document.getElementById('match-status').textContent=over?'Donor supply sufficient ✓':'Donor supply insufficient';
+    document.getElementById('match-diff').textContent=(diff>=0?'+':'')+diff+' grafts';
+    document.getElementById('match-diff').style.color=diff>=0?'#00d4a1':'#ff5c5c';
+  } else {
+    document.getElementById('match-fill').style.width='0%';
+    document.getElementById('match-status').textContent='Enter data to see donor–recipient balance';
+    document.getElementById('match-diff').textContent='';
+  }
+  renderRecTable(tG2);
+}
+
+function renderRecTable(tG2) {
+  let rows='', tA=0;
+  RZONES.forEach(z=>{
+    const d=recData[z.id], g=(d.area&&d.density)?Math.round(d.area*d.density):null;
+    if(d.area) tA+=d.area;
+    const pct=(g&&tG2)?Math.round(g/tG2*100)+'%':'—';
+    rows+=`<tr>
+      <td><span class="pill" style="background:${z.color}20;color:${z.color}">${z.label}</span></td>
+      <td style="font-family:var(--mono)">${d.area||'—'}</td>
+      <td style="font-family:var(--mono)">${d.density||'—'}</td>
+      <td style="font-family:var(--mono);font-weight:600;color:var(--accent)">${g?g.toLocaleString():'—'}</td>
+      <td style="font-family:var(--mono)">${pct}</td>
+    </tr>`;
+  });
+  rows+=`<tr class="total">
+    <td>Total</td>
+    <td>${tA?tA.toFixed(1):'—'}</td><td>—</td>
+    <td style="color:var(--accent)">${tG2?tG2.toLocaleString():'—'}</td>
+    <td>${tG2?'100%':'—'}</td>
+  </tr>`;
+  document.getElementById('rec-tbody').innerHTML=rows;
+}
+
+// ── REPORT ──
+function openReport() {
+  const pt = document.getElementById('pt-input').value || 'Unnamed patient';
+  const ptDate = document.getElementById('pt-date').value;
+  const ptMobile = document.getElementById('pt-mobile').value;
+  const surgDate = ptDate ? new Date(ptDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}) : new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  const tg=totalG(), th=totalH(), hpg=tg?(th/tg).toFixed(2):0;
+  const elapsed=startTime?Math.floor((Date.now()-startTime)/60000):0;
+  let rTotal=0; RZONES.forEach(z=>{const d=recData[z.id];if(d.area&&d.density)rTotal+=Math.round(d.area*d.density);});
+  const bal=tg-rTotal;
+
+  let donorRows='';
+  for(let zi=0;zi<4;zi++){
+    const zg=zG(zi),zh=zH(zi),a=zArea[zi],d=zDens[zi];
+    const est=(a&&d)?Math.round(a*d):null, pct=zExtPct[zi]||0;
+    const extEst=(est&&pct)?Math.round(est*pct/100):null;
+    const diff=extEst!==null?zg-extEst:(est!==null?zg-est:null);
+    donorRows+=`<div class="report-row">
+      <span class="report-key">${DZONES[zi]}</span>
+      <span class="report-val">${zg} grafts · ${zh} hairs · H/G ${zg?(zh/zg).toFixed(2):'—'}${extEst!==null?' · target '+extEst:''}${diff!==null?' · diff '+(diff>=0?'+':'')+diff:''}</span>
+    </div>`;
+  }
+
+  let recRows='';
+  RZONES.forEach(z=>{
+    const d=recData[z.id],g=(d.area&&d.density)?Math.round(d.area*d.density):null;
+    recRows+=`<div class="report-row">
+      <span class="report-key">${z.label}</span>
+      <span class="report-val">${d.area||'—'} cm² · ${d.density||'—'} g/cm² · ${g?g.toLocaleString()+' grafts':'—'}</span>
+    </div>`;
+  });
+
+  let opRows='';
+  for(let oi=0;oi<4;oi++){
+    const og=opG(oi),oh=opH(oi); if(!og) continue;
+    opRows+=`<div class="report-row">
+      <span class="report-key">${OPS[oi]}</span>
+      <span class="report-val">${og} grafts · H/G ${(oh/og).toFixed(2)}</span>
+    </div>`;
+  }
+
+  document.getElementById('modal-body').innerHTML=`
+    <div class="report-section">
+      <div class="report-section-title">Patient</div>
+      <div class="report-row"><span class="report-key">Name</span><span class="report-val">${pt}</span></div>
+      <div class="report-row"><span class="report-key">Date of surgery</span><span class="report-val">${surgDate}</span></div>
+      ${ptMobile?`<div class="report-row"><span class="report-key">Mobile</span><span class="report-val">${ptMobile}</span></div>`:''}
+      <div class="report-row"><span class="report-key">Session duration</span><span class="report-val">${elapsed} min</span></div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">Donor extraction summary</div>
+      <div class="report-row"><span class="report-key">Total grafts extracted</span><span class="report-val" style="color:var(--accent)">${tg.toLocaleString()}</span></div>
+      <div class="report-row"><span class="report-key">Total hairs</span><span class="report-val">${th.toLocaleString()}</span></div>
+      <div class="report-row"><span class="report-key">Average H/G</span><span class="report-val">${hpg}</span></div>
+      <div class="report-row"><span class="report-key">Singles %</span><span class="report-val">${tg?Math.round(counts.reduce((a,z)=>a+z.reduce((b,op)=>b+op[0],0),0)/tg*100)+'%':'—'}</span></div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">Donor zones</div>
+      ${donorRows||'<div class="report-row"><span class="report-key">No data</span></div>'}
+    </div>
+    ${opRows?`<div class="report-section"><div class="report-section-title">Operator breakdown</div>${opRows}</div>`:''}
+    <div class="report-section">
+      <div class="report-section-title">Recipient plan</div>
+      <div class="report-row"><span class="report-key">Total grafts needed</span><span class="report-val" style="color:var(--accent)">${rTotal.toLocaleString()}</span></div>
+      ${recRows}
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">Donor–recipient balance</div>
+      <div class="report-row"><span class="report-key">Extracted</span><span class="report-val">${tg.toLocaleString()}</span></div>
+      <div class="report-row"><span class="report-key">Needed</span><span class="report-val">${rTotal.toLocaleString()}</span></div>
+      <div class="report-row"><span class="report-key">Balance</span><span class="report-val" style="color:${bal>=0?'var(--accent)':'var(--red)'}">${bal>=0?'+':''}${bal.toLocaleString()}</span></div>
+    </div>
+    <button class="btn-copy" onclick="copyReport()">Copy report to clipboard</button>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeReport() { document.getElementById('modal').classList.remove('open'); }
+
+function copyReport() {
+  const pt=document.getElementById('pt-input').value||'Unnamed patient';
+  const ptDate=document.getElementById('pt-date').value;
+  const ptMobile=document.getElementById('pt-mobile').value;
+  const surgDate=ptDate?new Date(ptDate).toLocaleDateString():new Date().toLocaleDateString();
+  const tg=totalG(),th=totalH(),hpg=tg?(th/tg).toFixed(2):0;
+  let rTotal=0; RZONES.forEach(z=>{const d=recData[z.id];if(d.area&&d.density)rTotal+=Math.round(d.area*d.density);});
+  let text=`GRAFTCOUNT SURGICAL REPORT\n${'─'.repeat(40)}\nPatient: ${pt}\nDate of surgery: ${surgDate}${ptMobile?'\nMobile: '+ptMobile:''}\n\nDONOR EXTRACTION\nTotal grafts: ${tg} | Hairs: ${th} | Avg H/G: ${hpg}\n\nZONES\n`;
+  for(let zi=0;zi<4;zi++){const zg=zG(zi),zh=zH(zi),a=zArea[zi],d=zDens[zi],est=(a&&d)?Math.round(a*d):null,pct=zExtPct[zi]||0,extEst=(est&&pct)?Math.round(est*pct/100):null,diff=extEst!==null?zg-extEst:(est!==null?zg-est:null);text+=`${DZONES[zi]}: ${zg} grafts, ${zh} hairs, H/G ${zg?(zh/zg).toFixed(2):'—'}${extEst!==null?', target '+extEst:''}${diff!==null?', diff '+(diff>=0?'+':'')+diff:''}\n`;}
+  text+=`\nRECIPIENT PLAN\nTotal needed: ${rTotal}\n`;
+  RZONES.forEach(z=>{const d=recData[z.id],g=(d.area&&d.density)?Math.round(d.area*d.density):null;text+=`${z.label}: ${d.area||'—'}cm², ${d.density||'—'}g/cm², ${g?g+' grafts':'—'}\n`;});
+  text+=`\nBALANCE: ${tg-rTotal>=0?'+':''}${tg-rTotal} grafts`;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.querySelector('.btn-copy'); btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy report to clipboard',2000);
+  });
+}
+
+// ── RESET ──
+function resetAll() {
+  if (!confirm('Reset all data for this session?')) return;
+  counts=Array.from({length:4},()=>Array.from({length:4},()=>[0,0,0,0]));
+  history=[]; startTime=null; opStart=[null,null,null,null];
+  clearInterval(speedTimer);
+  zArea=[0,0,0,0]; zDens=[0,0,0,0]; zExtPct=[0,0,0,0];
+  RZONES.forEach(z=>recData[z.id]={area:0,density:0});
+  document.getElementById('s-speed').textContent='—';
+  document.getElementById('last-action').textContent='No entries yet';
+  document.getElementById('area-input').value='';
+  document.getElementById('density-input').value='';
+  document.getElementById('zone-capacity').textContent='—';
+  document.getElementById('pt-input').value='';
+  document.getElementById('pt-date').value='';
+  document.getElementById('pt-mobile').value='';
+  renderDonor(); buildRecGrid(); renderRecipient();
+}
+
+// ── BACKUP & RESTORE ──
+function saveBackup() {
+  const pt = document.getElementById('pt-input').value || '';
+  const ptDate = document.getElementById('pt-date').value || '';
+  const ptMobile = document.getElementById('pt-mobile').value || '';
+  const snapshot = {
+    version: 2,
+    savedAt: new Date().toISOString(),
+    patient: pt, surgeryDate: ptDate, mobile: ptMobile,
+    counts, zArea, zDens, zExtPct, recData, startTime,
+  };
+  const blob = new Blob([JSON.stringify(snapshot, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const fname = `graftcount_${(pt||'session').replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.json`;
+  a.href = url; a.download = fname; a.click();
+  URL.revokeObjectURL(url);
+  document.getElementById('backup-status').textContent = 'Saved ' + new Date().toLocaleTimeString();
+}
+
+function triggerRestore() {
+  document.getElementById('restore-input').click();
+}
+
+function loadBackup(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const snap = JSON.parse(e.target.result);
+      if (!snap.counts) { alert('Invalid backup file.'); return; }
+      if (!confirm(`Restore session for "${snap.patient||'unknown patient'}" saved on ${new Date(snap.savedAt).toLocaleString()}?\n\nThis will replace all current data.`)) return;
+      counts = snap.counts;
+      zArea = snap.zArea || [0,0,0,0];
+      zDens = snap.zDens || [0,0,0,0];
+      zExtPct = snap.zExtPct || [0,0,0,0];
+      recData = snap.recData || {};
+      RZONES.forEach(z => { if (!recData[z.id]) recData[z.id]={area:0,density:0}; });
+      startTime = snap.startTime || null;
+      document.getElementById('pt-input').value = snap.patient || '';
+      document.getElementById('pt-date').value = snap.surgeryDate || '';
+      document.getElementById('pt-mobile').value = snap.mobile || '';
+      document.getElementById('area-input').value = zArea[cZ]||'';
+      document.getElementById('density-input').value = zDens[cZ]||'';
+      updateZoneCapacity();
+      document.getElementById('backup-status').textContent = 'Restored · ' + new Date(snap.savedAt).toLocaleDateString();
+      document.getElementById('last-action').textContent = 'Session restored';
+      renderDonor(); buildRecGrid(); renderRecipient();
+    } catch(err) { alert('Could not read backup file: '+err.message); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ── INIT ──
+setDotColors();
+renderDonor();
+</script>
+</body>
+</html>
